@@ -1,0 +1,29 @@
+Available components and hardware information.
+--------------------------------------------------------------------------------
+PAPI Version             : 5.1.0.2
+Vendor string and code   : GenuineIntel (1)
+Model string and code    : Intel(R) Xeon(R) CPU E5-2670 0 @ 2.60GHz (45)
+CPU Revision             : 7.000000
+CPUID Info               : Family: 6  Model: 45  Stepping: 7
+CPU Max Megahertz        : 2600
+CPU Min Megahertz        : 2600
+Hdw Threads per core     : 1
+Cores per Socket         : 8
+NUMA Nodes               : 2
+CPUs per Node            : 8
+Total CPUs               : 16
+Running in a VM          : no
+Number Hardware Counters : 11
+Max Multiplex Counters   : 64
+--------------------------------------------------------------------------------
+
+Compiled-in components:
+Name:   perf_events             Linux perf_event CPU counters
+
+Active components:
+Name:   perf_events             Linux perf_event CPU counters
+                                Native: 632, Preset: 50, Counters: 11
+
+
+--------------------------------------------------------------------------------
+component.c                             PASSED
