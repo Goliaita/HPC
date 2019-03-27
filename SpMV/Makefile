@@ -10,3 +10,11 @@ gprof:
 perf:
 	gcc -DPERFCOUNT spmv.c -I"./perf_regions/src" -L"./perf_regions/build" -lperf_regions -o spmv-perf -lpapi
 
+run-perf:
+	./run.sh
+
+run-gprof:
+	./spmv-gprof
+	gprof ./spmv-gprof > gprof_out.txt
+
+
