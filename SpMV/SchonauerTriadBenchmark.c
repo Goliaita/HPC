@@ -17,7 +17,6 @@
 #define DEFAULT_NR DEFAULT_NMAX
 #define DEFAULT_INC 10
 #define DEFAULT_XIDX 0
-
 #define MAX_PATH_LENGTH 1024
 
 // #define WINOS
