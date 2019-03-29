@@ -1,16 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 #include <time.h>
 #include <unistd.h>
 #include <sys/time.h>
+#include <perf_regions.h>
+#include <stdbool.h>
+
 
 
 #define ANSI_COLOR_BLUE "\x1b[34m"      // Color blue for specified output
 #define ANSI_COLOR_RESET "\x1b[0m"      // Reset color for specified output
 
 #define MATRIXZISE 10                   // Size for each size of the square matrix
-#define SPARSITY 0.1                    // Percentage of sparsity in the matrix
+#define SPARSITY 1                    // Percentage of sparsity in the matrix
 #define RANDOMVALRANGE 10               // Range of random values contained in the matrix (starting from zero)
 
 int nnz;                                // Amount of non-zero values contained in the sparse matrix
@@ -21,36 +25,13 @@ int nnz;                                // Amount of non-zero values contained i
  * m: Is the number of rows of A 
  * n: Is the number of columns of A
  **/
-void printMatrix(int **A, int m, int n) {
-    for(int r = 0; r < m; r++) {
-        for(int c = 0; c < n; c++) {
-            if(c == 0)
-                printf("| %d ", A[r][c]);
-            else if(c == n-1)
-                printf("%d | \n", A[r][c]);
-            else
-                printf("%d ", A[r][c]);
-        }
-    }
-}
 
 /**
  * This method takes an array A and prints all its values, where,
  * A: Is the array to print
  * length: Is the number of values of A
  **/
-void printArray(int *A, int length) {
-    for (int i = 0; i < length; i++) {
-        if (length == 1)
-            printf("[ %d ] \n", A[i]);
-        else if (i == 0)
-            printf("[ %d ", A[i]);
-        else if (i == (length - 1))
-            printf("%d ] \n", A[i]);
-        else
-            printf("%d ", A[i]);
-    }
-}
+
 
 /**
  * This method generates random values for making a sparse matrix A, where:
@@ -59,12 +40,12 @@ void printArray(int *A, int length) {
  * n: Is the number of columns of A
  * returns: nnz (number of nonzero values contained in A)
  **/
-int **genSparseMatrix(int m, int n) {
+float **genSparseMatrix(int m, int n) {
     srand(time(NULL));                                          // Seed rand function
 
-    int **A = (int **)malloc(m * sizeof(int *));
+    float **A = (float **)malloc(m * sizeof(float *));
     for (int i = 0; i < m; i++)
-        A[i] = (int *)malloc(n * sizeof(int));
+        A[i] = (float *)malloc(n * sizeof(float));
 
     nnz = m * n * SPARSITY;                                     // Amount of non-zero elements to be stored in A
     printf("Non-zero values to be stored: %d\n", nnz);          // Prints nnz
@@ -93,7 +74,7 @@ int **genSparseMatrix(int m, int n) {
  * A: Is the array to initialize
  * length: Is the length of A
  **/
-void initializeArray(int *A, int length) {
+void initializeArray(float *A, int length) {
     for (int i = 0; i < length; i++) {
         A[i] = 0;
     }
@@ -104,10 +85,10 @@ void initializeArray(int *A, int length) {
  * x: Is the array to fill up with random values
  * length: Is the length of x
  **/
-int *genDenseVector(int length) {
+float *genDenseVector(int length) {
     srand(time(NULL));
 
-    int *x = (int *)malloc(length * sizeof(int));
+    float *x = (float *)malloc(length * sizeof(float));
     initializeArray(x, length);      // Initialize array with all values being zero
 
     for(int i = 0; i < length; i++) {
@@ -124,7 +105,7 @@ int *genDenseVector(int length) {
  * n: Is the number of columns of A
  * returns: Total nnz
  **/
-int checkNNZ(int **A, int m, int n) {
+int checkNNZ(float **A, int m, int n) {
     int realNNZ = 0;
     for(int r = 0; r < m; r++) {
         for(int c  = 0; c < n; c++) {
@@ -147,7 +128,7 @@ int checkNNZ(int **A, int m, int n) {
  * m: Is the row size of A
  * n: Is the column size of A
  **/
-void compression(int **A, int *values, int *colIndex, int *rowIndex, int m, int n) {
+void compression(float **A, float *values, int *colIndex, int *rowIndex, int m, int n) {
     int i = 0;
     for(int r = 0; r < m; r++) {
         for(int c = 0; c < n; c++) {
@@ -159,12 +140,6 @@ void compression(int **A, int *values, int *colIndex, int *rowIndex, int m, int 
             }
         }
     }
-    printf("Values: ");
-    printArray(values, nnz);
-    printf("Col Indices: ");
-    printArray(colIndex, nnz);
-    printf("Row Indices: ");
-    printArray(rowIndex, nnz);
 }
 
 /**
@@ -175,15 +150,14 @@ void compression(int **A, int *values, int *colIndex, int *rowIndex, int m, int 
  * x: Is the vector multiplying matrix A
  * m: Is the row size of A
  **/
-int *solutionSpMV(int *values, int *colIndex, int *rowIndex, int *x, int m) {
-    int *solution = (int  *)malloc(m * sizeof(int));        // Allocation of memory for solution array
+float *solutionSpMV(float *values, int *colIndex, int *rowIndex, float *x, int m) {
+	float *solution = (float  *)malloc(m * sizeof(float));        // Allocation of memory for solution array
 
     // Initialize solution array with all values being zero
     initializeArray(solution, m);
-
     // Computes SpMV using the compressed information about A (values, colIndex, and rowIndex arrays)
     for(int i = 0; i < nnz; i++) {
-        int val = (values[i] * x[colIndex[i]]);
+        float val = (values[i] * x[colIndex[i]]);
         solution[rowIndex[i]] += (values[i] * x[colIndex[i]]);
     }
 
@@ -192,44 +166,60 @@ int *solutionSpMV(int *values, int *colIndex, int *rowIndex, int *x, int m) {
 
 /********************************** MAIN ***********************************/
 int main(int argc, char *argv[]){
-    int m, n;
-    if (argc < 2){
-        m = MATRIXZISE;     // Number of rows in matrix A
-        n = MATRIXZISE;     // Number of columns in matrix A
-    }else{
-        n = atoi(argv[1]);
-        m = atoi(argv[2]);
-    }
 
-    printf("Rows: %d \n", m);
-    printf("Columns: %d \n", n);
+    const int m = argc > 1 ? atoi(argv[1]) : MATRIXZISE;
+    const int n = argc > 2 ? atoi(argv[2]) : MATRIXZISE;
+    const bool perf_region = argc > 3 ? (strcmp(argv[3], "true") ? false : true) : false;
+    printf("m = %d, n = %d, perf_regionS = %s, perf_regionB = %d\n", m, n, argv[3], perf_region);
+	double elaps, MFLOPS;    
 
-    int **A = genSparseMatrix(m, n);     // Creates sparse matrix A
-    printf("Matrix A: \n");
-    printMatrix(A, m, n);                   // Prints matrix A
+    if(perf_region) {
+		perf_regions_init();
 
-    int *x = genDenseVector(m);          // Creates vector that multiplies matrix A
-    printf("Vector x: ");
-    printArray(x,m);                        // Prints vector x
+	    puts("\n*** Matrix Vector multiply ***\n");	
+	
+    	perf_region_start(0, (PERF_FLAG_TIMINGS | PERF_FLAG_COUNTERS)); //FOO
+	}
+
+    float **A = genSparseMatrix(m, n);     // Creates sparse matrix A
+
+    float *x = genDenseVector(m);          // Creates vector that multiplies matrix A
+                      // Prints vector x
 
 
-    int realNNZ = checkNNZ(A,m,n);
+    float realNNZ = checkNNZ(A,m,n);
     double sparsePercentage = (realNNZ * 100) / (double)(m*n);
-    printf("Sparse percentage: %f \n", sparsePercentage);
     printf("\n");
 
    // Arrays containing the compressed information of A
-    printf("Compressed information of A: \n");
-    int *values = (int  *)malloc(nnz * sizeof(int));            // Non-zero values contained in A;
+    float *values = (float  *)malloc(nnz * sizeof(float));            // Non-zero values contained in A;
     int *colIndex = (int *)malloc(nnz * sizeof(int));           // Column indices of the non-zero values located in A
     int *rowIndex = (int *)malloc(nnz * sizeof(int));           // Row indicex of the non-zero values located in A
 
     compression(A,values,colIndex,rowIndex,m,n);                // Compress all valuable info about A's non-zero values in values, colIndex, and rowIndex
     printf("\n");
 
-    int *y = solutionSpMV(values,colIndex,rowIndex,x,m);        // Solves SpMV using the compressed information
-    printf("Solution: ");
-    printArray(y,m);
+    struct timeval tp;
+	gettimeofday(&tp, NULL);
+	elaps = - (double)(tp.tv_sec + tp.tv_usec/1000000.0);
+ 
+	float *y = solutionSpMV(values, colIndex, rowIndex, x, m);
+
+	gettimeofday(&tp, NULL);
+    elaps = elaps + ((double)(tp.tv_sec + tp.tv_usec/1000000.0));
+
+    if (perf_region) {
+        MFLOPS = ((m*(m*n))<<1)/(elaps*1000000);
+		printf("Iteration = %d, Matrix dim = %d\n", nnz, m*n);
+		printf("Elapsed time: %lf\n", elaps);
+		printf("MFLOPS: %lf\n", MFLOPS);
+		
+		perf_region_stop(0);
+    
+    	perf_regions_finalize();
+    }
+    
+	(void) getchar();
 
     return 0;
 }
