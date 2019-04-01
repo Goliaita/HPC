@@ -1,0 +1,14 @@
+digraph {
+	graph [fontname=Arial, nodesep=0.125, ranksep=0.25];
+	node [fontcolor=white, fontname=Arial, height=0, shape=box, style=filled, width=0];
+	edge [fontname=Arial];
+	1 [color="#ff0000", fontcolor="#ffffff", fontsize="10.00", label="main\n100.00%\n(0.00%)"];
+	1 -> 2 [arrowsize="0.73", color="#1eba09", fontcolor="#1eba09", fontsize="10.00", label="52.94%\n1×", labeldistance="2.12", penwidth="2.12"];
+	1 -> 3 [arrowsize="0.45", color="#0c778e", fontcolor="#0c778e", fontsize="10.00", label="20.59%\n1×", labeldistance="0.82", penwidth="0.82"];
+	1 -> 4 [arrowsize="0.38", color="#0c5486", fontcolor="#0c5486", fontsize="10.00", label="14.71%\n1×", labeldistance="0.59", penwidth="0.59"];
+	1 -> 5 [arrowsize="0.35", color="#0d4482", fontcolor="#0d4482", fontsize="10.00", label="11.76%\n1×", labeldistance="0.50", penwidth="0.50"];
+	2 [color="#1eba09", fontcolor="#ffffff", fontsize="10.00", label="genSparseMatrix\n52.94%\n(52.94%)\n1×"];
+	3 [color="#0c778e", fontcolor="#ffffff", fontsize="10.00", label="compression\n20.59%\n(20.59%)\n1×"];
+	4 [color="#0c5486", fontcolor="#ffffff", fontsize="10.00", label="solutionSpMV\n14.71%\n(14.71%)\n1×"];
+	5 [color="#0d4482", fontcolor="#ffffff", fontsize="10.00", label="checkNNZ\n11.76%\n(11.76%)\n1×"];
+}
