@@ -20,20 +20,6 @@
 int nnz;                                // Amount of non-zero values contained in the sparse matrix
 
 /**
- * This methos print all values contained in a matrix, where:
- * A: Is the matrix to print
- * m: Is the number of rows of A 
- * n: Is the number of columns of A
- **/
-
-/**
- * This method takes an array A and prints all its values, where,
- * A: Is the array to print
- * length: Is the number of values of A
- **/
-
-
-/**
  * This method generates random values for making a sparse matrix A, where:
  * A: Is the matrix to fill up
  * m: Is the number of rows of A 
