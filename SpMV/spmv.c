@@ -159,7 +159,11 @@ int main(int argc, char *argv[]){
     printf("m = %d, n = %d, perf_regionS = %s, perf_regionB = %d\n", m, n, argv[3], perf_region);
 	double elaps, MFLOPS;    
 
-
+   if(perf_region) {
+		perf_regions_init();
+	    puts("\n*** Matrix Vector multiply ***\n");
+    	perf_region_start(0, (PERF_FLAG_TIMINGS | PERF_FLAG_COUNTERS));
+   }
 
     float **A = genSparseMatrix(m, n);     // Creates sparse matrix A
 
@@ -174,29 +178,26 @@ int main(int argc, char *argv[]){
    // Arrays containing the compressed information of A
     float *values = (float  *)malloc(nnz * sizeof(float));            // Non-zero values contained in A;
     int *colIndex = (int *)malloc(nnz * sizeof(int));           // Column indices of the non-zero values located in A
-    int *rowIndex = (int *)malloc(nnz * sizeof(int));           // Row indicex of the non-zero values located in A
+    int *rowIndex = (int *)malloc(nnz * sizeof(int));
+    struct timeval tp;
+	gettimeofday(&tp, NULL);
+	elaps = - (double)(tp.tv_sec + tp.tv_usec/1000000.0);           // Row indicex of the non-zero values located in A
 
     compression(A,values,colIndex,rowIndex,m,n);                // Compress all valuable info about A's non-zero values in values, colIndex, and rowIndex
-    printf("\n");
-
-    if(perf_region) {
-		perf_regions_init();
-	    puts("\n*** Matrix Vector multiply ***\n");
-    	perf_region_start(0, (PERF_FLAG_TIMINGS | PERF_FLAG_COUNTERS));
-	    float *y = solutionSpMV(values, colIndex, rowIndex, x, m);
-		perf_region_stop(0);
-    	perf_regions_finalize();
-    }else{
-        struct timeval tp;
-	    gettimeofday(&tp, NULL);
-	    elaps = - (double)(tp.tv_sec + tp.tv_usec/1000000.0);
-        float *y = solutionSpMV(values, colIndex, rowIndex, x, m);
+    
+ 
+	float *y = solutionSpMV(values, colIndex, rowIndex, x, m);
+		
+        
+    if(perf_region){
         gettimeofday(&tp, NULL);
         elaps = elaps + ((double)(tp.tv_sec + tp.tv_usec/1000000.0));
         MFLOPS = ((m*(m*n))<<1)/(elaps*1000000);
 		printf("Iteration = %d, Matrix dim = %d\n", nnz, m*n);
 		printf("Elapsed time: %lf\n", elaps);
 		printf("MFLOPS: %lf\n", MFLOPS);
+        perf_region_stop(0);
+    	perf_regions_finalize();
     }
    
 	(void) getchar();
