@@ -4,4 +4,4 @@ SpMV/.vscode/
 *.png
 *.o
 *.jpg
-
+*.ipynb_checkpoints/
